@@ -16,8 +16,9 @@ import Main from './components/MainComponent.vue'
 </template>
 
 <style scoped>
-#bgImage {
-  /* background-size: scale-down; */
-  background-position-x: 32%;
+@media (max-width: 4262px) {
+  #bgImage {
+    background-position-x: 32%;
+  }
 }
 </style>
