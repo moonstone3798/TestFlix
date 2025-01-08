@@ -5,9 +5,11 @@ import { initFlowbite } from 'flowbite'
 import { subMonths } from 'date-fns'
 
 onMounted(() => {
-  getMovies(), initFlowbite()
+  getMovies()
+  initFlowbite()
 })
 const movies = ref([])
+const minIndex = ref(0)
 const option = ref('TENDENCIA')
 const getMovies = async () => {
   try {
@@ -21,10 +23,10 @@ const getMovies = async () => {
     console.log('JSON', json)
     let filteredMovies = []
     if (option.value === 'MIS PELICULAS') {
-      filteredMovies = json.filter((movie) => movie.myList === true)
+      filteredMovies = json.filter((movie) => movie.like === true)
     } else if (option.value === 'AGREGADAS RECIENTEM.') {
       const result = subMonths(new Date(), 6)
-      filteredMovies = json.filter((movie) => movie.created_at == result)
+      filteredMovies = json.filter((movie) => new Date(movie.created_at) >= result)
     } else {
       filteredMovies = json.filter((movie) => movie.trend === true)
     }
@@ -37,17 +39,29 @@ const getMovies = async () => {
 const chooseOption = (value) => {
   option.value = value
   getMovies()
+  minIndex.value = 0
+}
+const prevMovie = () => {
+  if (minIndex.value > 0) {
+    minIndex.value -= 1
+  }
+}
+
+const nextMovie = () => {
+  if (minIndex.value + 4 < movies.value.length) {
+    minIndex.value += 1
+  }
 }
 </script>
 <template>
-  <div class="flex flex-col items-center pt-4">
+  <div class="flex flex-col items-center pt-4 min-h-[78.75vh]">
     <button
       id="dropdownDefaultButton"
       data-dropdown-toggle="dropdown"
       class="text-white focus:outline-none font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center"
       type="button"
     >
-      VER: <span class="text-[#D1A2FF]"> {{ option }}</span>
+      VER: <span class="text-[#D1A2FF] pl-2"> {{ option }}</span>
       <svg
         class="w-2.5 h-2.5 ms-3"
         aria-hidden="true"
@@ -85,22 +99,30 @@ const chooseOption = (value) => {
         </li>
       </ul>
     </div>
-    <div class="flex flex-col items-center gap-2">
-      <span
-        v-if="movies.length > 4"
+    <div class="flex flex-col items-center gap-2 mt-2">
+      <button
+        v-show="minIndex > 0"
         class="icon-[formkit--up] text-white"
         role="img"
         aria-hidden="true"
-      ></span>
+        @click="prevMovie"
+      ></button>
       <div class="flex flex-col gap-4">
-        <MovieCard v-for="movie in movies.slice(0, 4)" :name="movie.name" :img="movie.img" />
+        <MovieCard
+          v-for="movie in movies.slice(minIndex, minIndex + 4)"
+          :key="movie.id"
+          :name="movie.name"
+          :img="movie.img"
+          :description="movie.description"
+        />
       </div>
-      <span
-        v-if="movies.length > 4"
+      <button
+        v-show="minIndex + 4 < movies.length"
         class="icon-[formkit--up] rotate-180 text-white"
         role="img"
         aria-hidden="true"
-      ></span>
+        @click="nextMovie"
+      ></button>
     </div>
   </div>
 </template>
