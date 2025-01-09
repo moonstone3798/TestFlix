@@ -12,11 +12,13 @@
   },
   "dependencies": {
     "@preline/overlay": "^2.5.2",
+    "axios": "^1.7.9",
     "date-fns": "^4.1.0",
     "dropzone-vue3": "^1.0.2",
     "flowbite": "^2.5.2",
     "preline": "^2.7.0",
     "vue": "^3.5.13",
+    "vue-router": "^4.5.0",
     "vue2-dropzone": "^3.6.0"
   },
   "devDependencies": {
