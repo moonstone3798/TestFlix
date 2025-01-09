@@ -1,46 +1,40 @@
 <script setup>
 import MovieCard from './MovieCard.vue'
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
 import { initFlowbite } from 'flowbite'
 import { subMonths } from 'date-fns'
+import instance from '../plugins/axiosMockApi'
 
-onMounted(() => {
-  getMovies()
-  initFlowbite()
-})
-const movies = ref([])
+const filter = ref([])
 const minIndex = ref(0)
-const option = ref('TENDENCIA')
+const route = useRoute()
+
 const getMovies = async () => {
   try {
-    const url = 'https://677c8c3d4496848554c6c7c0.mockapi.io/api/v1/movies'
-
-    const response = await fetch(url)
-    const json = await response.json()
-
-    console.log('reponse de el fetch', response)
-
-    console.log('JSON', json)
-    let filteredMovies = []
-    if (option.value === 'MIS PELICULAS') {
-      filteredMovies = json.filter((movie) => movie.like === true)
-    } else if (option.value === 'AGREGADAS RECIENTEM.') {
-      const result = subMonths(new Date(), 6)
-      filteredMovies = json.filter((movie) => new Date(movie.created_at) >= result)
-    } else {
-      filteredMovies = json.filter((movie) => movie.trend === true)
-    }
-    movies.value = filteredMovies
+    const { data } = await instance.get('/movies')
+    filter.value = data
   } catch (error) {
     console.log('Error: ', error)
   }
 }
 
-const chooseOption = (value) => {
-  option.value = value
+const filteredMovies = computed(() => {
+  if (route.name === 'MIS PELICULAS') {
+    return filter.value.filter((movie) => movie.like === true)
+  } else if (route.name === 'AGREGADAS RECIENTEM.') {
+    const result = subMonths(new Date(), 6)
+    return filter.value.filter((movie) => new Date(movie.created_at) >= result)
+  } else {
+    return filter.value.filter((movie) => movie.trend === true)
+  }
+})
+
+onMounted(() => {
   getMovies()
-  minIndex.value = 0
-}
+  initFlowbite()
+})
+
 const prevMovie = () => {
   if (minIndex.value > 0) {
     minIndex.value -= 1
@@ -48,11 +42,12 @@ const prevMovie = () => {
 }
 
 const nextMovie = () => {
-  if (minIndex.value + 4 < movies.value.length) {
+  if (minIndex.value + 4 < filteredMovies.value.length) {
     minIndex.value += 1
   }
 }
 </script>
+
 <template>
   <div class="flex flex-col items-center pt-4 min-h-[78.75vh]">
     <button
@@ -61,7 +56,10 @@ const nextMovie = () => {
       class="text-white focus:outline-none font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center"
       type="button"
     >
-      VER: <span class="text-[#D1A2FF] pl-2"> {{ option }}</span>
+      VER:
+      <span class="text-[#D1A2FF] pl-2">
+        {{ route.name }}
+      </span>
       <svg
         class="w-2.5 h-2.5 ms-3"
         aria-hidden="true"
@@ -78,24 +76,37 @@ const nextMovie = () => {
         />
       </svg>
     </button>
-    <div id="dropdown" class="z-10 hidden bg-[#242424] divide-y divide-gray-100 shadow w-44">
+    <div
+      id="dropdown"
+      class="z-10 hidden bg-[#242424] divide-y divide-gray-100 shadow md:w-44 w-full"
+    >
       <ul class="py-2 text-sm text-white" aria-labelledby="dropdownDefaultButton">
         <li>
-          <a
-            class="block px-4 py-2 hover:bg-zinc-700 text-[#D1A2FF]"
-            @click="chooseOption('TENDENCIA')"
-            >TENDENCIA</a
+          <router-link
+            to="/tendencia"
+            class="block px-4 py-2 hover:bg-zinc-700"
+            :class="{ 'text-[#D1A2FF]': $route.name === 'TENDENCIA' }"
           >
+            TENDENCIA
+          </router-link>
         </li>
         <li>
-          <a class="block px-4 py-2 hover:bg-zinc-700" @click="chooseOption('MIS PELICULAS')"
-            >MIS PELICULAS</a
+          <router-link
+            to="/mis-peliculas"
+            class="block px-4 py-2 hover:bg-zinc-700"
+            :class="{ 'text-[#D1A2FF]': $route.name === 'MIS PELICULAS' }"
           >
+            MIS PELICULAS
+          </router-link>
         </li>
         <li>
-          <a class="block px-4 py-2 hover:bg-zinc-700" @click="chooseOption('AGREGADAS RECIENTEM.')"
-            >AGREGADAS RECIENTEM.</a
+          <router-link
+            to="/agregadas-recientemente"
+            class="block px-4 py-2 hover:bg-zinc-700"
+            :class="{ 'text-[#D1A2FF]': $route.name === 'AGREGADAS RECIENTEM.' }"
           >
+            AGREGADAS RECIENTEM.
+          </router-link>
         </li>
       </ul>
     </div>
@@ -109,7 +120,7 @@ const nextMovie = () => {
       ></button>
       <div class="flex flex-col gap-4">
         <MovieCard
-          v-for="movie in movies.slice(minIndex, minIndex + 4)"
+          v-for="movie in filteredMovies.slice(minIndex, minIndex + 4)"
           :key="movie.id"
           :name="movie.name"
           :img="movie.img"
@@ -117,7 +128,7 @@ const nextMovie = () => {
         />
       </div>
       <button
-        v-show="minIndex + 4 < movies.length"
+        v-show="minIndex + 4 < filteredMovies.length"
         class="icon-[formkit--up] rotate-180 text-white"
         role="img"
         aria-hidden="true"
