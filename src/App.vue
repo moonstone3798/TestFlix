@@ -4,8 +4,8 @@ import Main from './components/MainComponent.vue'
 </script>
 
 <template>
-  <div id="bgImage" class="bg-breaking-bad bg-cover h-screen bg-no-repeat w-screen font-open-sans">
-    <header class="flex justify-center w-screen">
+  <div id="bgImage" class="bg-cover h-screen bg-no-repeat w-screen font-open-sans bg-breaking-bad">
+    <header class="flex justify-center items-center w-screen">
       <Header />
     </header>
 

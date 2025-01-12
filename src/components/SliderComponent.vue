@@ -1,53 +1,3 @@
-<script setup>
-import MovieCard from './MovieCard.vue'
-import { ref, computed, onMounted } from 'vue'
-import { useRoute } from 'vue-router'
-import { initFlowbite } from 'flowbite'
-import { subMonths } from 'date-fns'
-import instance from '../plugins/axiosMockApi'
-
-const filter = ref([])
-const minIndex = ref(0)
-const route = useRoute()
-
-const getMovies = async () => {
-  try {
-    const { data } = await instance.get('/movies')
-    filter.value = data
-  } catch (error) {
-    console.log('Error: ', error)
-  }
-}
-
-const filteredMovies = computed(() => {
-  if (route.name === 'MIS PELICULAS') {
-    return filter.value.filter((movie) => movie.like === true)
-  } else if (route.name === 'AGREGADAS RECIENTEM.') {
-    const result = subMonths(new Date(), 6)
-    return filter.value.filter((movie) => new Date(movie.created_at) >= result)
-  } else {
-    return filter.value.filter((movie) => movie.trend === true)
-  }
-})
-
-onMounted(() => {
-  getMovies()
-  initFlowbite()
-})
-
-const prevMovie = () => {
-  if (minIndex.value > 0) {
-    minIndex.value -= 1
-  }
-}
-
-const nextMovie = () => {
-  if (minIndex.value + 4 < filteredMovies.value.length) {
-    minIndex.value += 1
-  }
-}
-</script>
-
 <template>
   <div class="flex flex-col items-center pt-4 min-h-[78.75vh]">
     <button
@@ -118,13 +68,11 @@ const nextMovie = () => {
         aria-hidden="true"
         @click="prevMovie"
       ></button>
-      <div class="flex flex-col gap-4">
+      <div class="flex flex-col gap-4 items-center">
         <MovieCard
           v-for="movie in filteredMovies.slice(minIndex, minIndex + 4)"
           :key="movie.id"
-          :name="movie.name"
-          :img="movie.img"
-          :description="movie.description"
+          :movie="movie"
         />
       </div>
       <button
@@ -137,3 +85,53 @@ const nextMovie = () => {
     </div>
   </div>
 </template>
+<script setup>
+import MovieCard from './MovieCard.vue'
+import { ref, computed, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
+import { initFlowbite } from 'flowbite'
+import { subMonths } from 'date-fns'
+import axiosMockApi from '@/plugins/axiosMockApi'
+const { instance } = axiosMockApi
+
+const filter = ref([])
+const minIndex = ref(0)
+const route = useRoute()
+
+const getMovies = async () => {
+  try {
+    const { data } = await instance.get('/movies')
+    filter.value = data
+  } catch (error) {
+    console.log('Error: ', error)
+  }
+}
+
+const filteredMovies = computed(() => {
+  if (route.name === 'MIS PELICULAS') {
+    return filter.value.filter((movie) => movie.like === true)
+  } else if (route.name === 'AGREGADAS RECIENTEM.') {
+    const result = subMonths(new Date(), 8)
+    return filter.value.filter((movie) => new Date(movie.created_at) >= result)
+  } else {
+    return filter.value.filter((movie) => movie.trend === true)
+  }
+})
+
+onMounted(() => {
+  getMovies()
+  initFlowbite()
+})
+
+const prevMovie = () => {
+  if (minIndex.value > 0) {
+    minIndex.value -= 1
+  }
+}
+
+const nextMovie = () => {
+  if (minIndex.value + 4 < filteredMovies.value.length) {
+    minIndex.value += 1
+  }
+}
+</script>

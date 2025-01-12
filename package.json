@@ -19,7 +19,8 @@
     "preline": "^2.7.0",
     "vue": "^3.5.13",
     "vue-router": "^4.5.0",
-    "vue2-dropzone": "^3.6.0"
+    "vue2-dropzone": "^3.6.0",
+    "vue3-draggable": "^2.0.9"
   },
   "devDependencies": {
     "@eslint/js": "^9.14.0",

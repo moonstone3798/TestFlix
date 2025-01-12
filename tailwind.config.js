@@ -15,7 +15,9 @@ export default {
       backgroundImage: {
         'breaking-bad': "url('/img/BREAKINGBAD.png')",
         'radial-top-right':
-          'radial-gradient(circle at top right, #8762ac, #7e5ba1, #755595, #6c4e8a, #63487f, #5d4377, #563f6e, #503a66, #4a355e, #433156, #3d2c4e, #372846)',
+          'radial-gradient(circle at top right, #8762ac, #563f6e, #372846, #372846, #372846, #372846, #372846,  #372846, #372846)',
+        'dark-gradient':
+          'linear-gradient(to bottom, rgba(36, 36, 36, 0),rgba(36, 36, 36, 0.25),rgba(36, 36, 36, 0.5),rgba(36, 36, 36, 0.75),rgba(36, 36, 36))',
       },
       fontFamily: {
         'open-sans': ['Open Sans', 'serif'],

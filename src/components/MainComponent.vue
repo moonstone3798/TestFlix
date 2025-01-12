@@ -1,8 +1,3 @@
-<script setup>
-import Button from './ButtonWithIcon.vue'
-import SliderComponent from './SliderComponent.vue'
-</script>
-
 <template>
   <div class="flex md:flex-row flex-col md:items-end md: justify-around">
     <div class="md:w-[51vw] pt-32 md:pb-[10.79vh] md:pt-0 flex md:block flex-col items-center">
@@ -16,15 +11,22 @@ import SliderComponent from './SliderComponent.vue'
         <Button title="REPRODUCIR" icon="icon-[mdi-light--play]" :class="'bg-[#242424]'" />
         <Button
           title="MI LISTA"
-          icon="icon-[mynaui--plus]"
+          :icon="listState ? 'icon-[tabler--check]' : 'icon-[mynaui--plus]'"
           class="md:flex hidden border border-white"
           :class="'bg-[#24242480] 	'"
+          @click="addToMyList(firstMovie.id)"
         />
         <button
           title="Añadir a Mi Lista"
           class="bg-[#242424] md:hidden block border px-2 border-white rounded-[5px] text-white flex items-center h-14 justify-center gap-3.5"
+          @click="addToMyList(firstMovie.id)"
         >
-          <span class="icon-[mynaui--plus] text-2xl" role="img" aria-hidden="true"></span>
+          <span
+            :class="listState ? 'icon-[tabler--check]' : 'icon-[mynaui--plus]'"
+            class="text-2xl"
+            role="img"
+            aria-hidden="true"
+          ></span>
         </button>
       </div>
     </div>
@@ -33,5 +35,33 @@ import SliderComponent from './SliderComponent.vue'
     </div>
   </div>
 </template>
+<script setup>
+import Button from './ButtonWithIcon.vue'
+import SliderComponent from './SliderComponent.vue'
+import axiosMockApi from '@/plugins/axiosMockApi'
+import { ref } from 'vue'
 
-<style scoped></style>
+const firstMovie = ref({})
+const getFirstMovie = async () => {
+  try {
+    const response = await instance.get(`movies/1`)
+    firstMovie.value = response.data
+  } catch (error) {
+    console.log('Error: ', error)
+  }
+}
+const listState = ref(firstMovie.value.myList)
+const { instance } = axiosMockApi
+
+const addToMyList = async (id) => {
+  listState.value = !listState.value
+
+  try {
+    await instance.put(`movies/${id}`, {
+      myList: listState.value,
+    })
+  } catch (error) {
+    console.log('Error: ', error)
+  }
+}
+</script>
